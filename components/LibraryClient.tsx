@@ -35,45 +35,68 @@ export default function LibraryClient({ initialBooks, userInitials, userImage }:
     }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [initialBooks, searchTerm, activeFilter]);
 
-  const refresh = () => router.refresh();
-
   const addBook = async (data: { title: string; author: string; status: Exclude<BookStatus, 'all'> }) => {
-    await fetch('/api/books', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    setIsAdding(false);
-    refresh();
+    try {
+      const res = await fetch('/api/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Falha ao adicionar livro');
+      setIsAdding(false);
+      router.refresh();
+    } catch {
+      alert('Erro ao adicionar livro. Tente novamente.');
+    }
   };
 
   const updateBook = async (id: string, updates: Partial<Pick<Book, 'status' | 'rating'>>) => {
-    await fetch(`/api/books/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    refresh();
+    try {
+      const res = await fetch(`/api/books/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Falha ao atualizar livro');
+      router.refresh();
+    } catch {
+      alert('Erro ao atualizar livro. Tente novamente.');
+    }
   };
 
   const deleteBook = async (id: string) => {
-    await fetch(`/api/books/${id}`, { method: 'DELETE' });
-    setSelectedBookId(null);
-    refresh();
+    try {
+      const res = await fetch(`/api/books/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Falha ao remover livro');
+      setSelectedBookId(null);
+      router.refresh();
+    } catch {
+      alert('Erro ao remover livro. Tente novamente.');
+    }
   };
 
   const addAnnotation = async (bookId: string, content: string) => {
-    await fetch(`/api/books/${bookId}/annotations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
-    });
-    refresh();
+    try {
+      const res = await fetch(`/api/books/${bookId}/annotations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      if (!res.ok) throw new Error('Falha ao salvar anotação');
+      router.refresh();
+    } catch {
+      alert('Erro ao salvar anotação. Tente novamente.');
+    }
   };
 
   const deleteAnnotation = async (bookId: string, annotationId: string) => {
-    await fetch(`/api/books/${bookId}/annotations?annotationId=${annotationId}`, { method: 'DELETE' });
-    refresh();
+    try {
+      const res = await fetch(`/api/books/${bookId}/annotations?annotationId=${annotationId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Falha ao remover anotação');
+      router.refresh();
+    } catch {
+      alert('Erro ao remover anotação. Tente novamente.');
+    }
   };
 
   return (

@@ -17,12 +17,7 @@ export default function Rating({ value, onChange, size = 16, interactive = false
           key={star}
           size={size}
           className={`${star <= value ? 'fill-amber-400 text-amber-400' : 'text-brand-border'} ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
-          onClick={(e) => {
-            if (interactive && onChange) {
-              e.stopPropagation();
-              onChange(star);
-            }
-          }}
+          onClick={interactive && onChange ? (e) => { e.stopPropagation(); onChange(star); } : undefined}
         />
       ))}
     </div>

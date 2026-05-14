@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, MessageSquare, BookOpen, CheckCircle2, Bookmark, Search } from 'lucide-react';
+import { Trash2, MessageSquare, BookOpen, CheckCircle2, Bookmark, ArrowLeft } from 'lucide-react';
 import type { Book, BookStatus } from '@/types';
 import Rating from './Rating';
 
@@ -44,7 +44,7 @@ export default function BookDetail({
               onClick={onBack}
               className="text-brand-muted hover:text-brand-text flex items-center gap-1 text-xs font-bold uppercase tracking-widest mb-2"
             >
-              <Search className="w-3 h-3 rotate-180" /> Voltar
+              <ArrowLeft className="w-3 h-3" /> Voltar
             </button>
             <h1 className="text-4xl font-display leading-tight">{book.title}</h1>
             <p className="text-brand-muted italic text-lg">{book.author}</p>

@@ -94,11 +94,6 @@ export default function BookCard({ book, index, searchTerm, onSelect, onUpdateSt
           </div>
         </>
       )}
-      {book.annotations.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-brand-border line-clamp-2 italic text-xs text-brand-muted leading-relaxed">
-          &quot;{book.annotations[0].content}&quot;
-        </div>
-      )}
     </motion.div>
   );
 }
