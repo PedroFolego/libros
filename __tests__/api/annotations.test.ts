@@ -80,4 +80,13 @@ describe('DELETE /api/books/[id]/annotations', () => {
     const res = await DELETE(req, { params });
     expect(res.status).toBe(204);
   });
+
+  it('deleta anotação com escopo do bookId correto', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as any);
+    mockFindUnique.mockResolvedValue(livroFixture as any);
+    mockDelete.mockResolvedValue({ id: 'a1', content: 'x', createdAt: new Date(), bookId: 'book-1' });
+    const req = new Request('http://localhost/api/books/book-1/annotations?annotationId=a1', { method: 'DELETE' });
+    await DELETE(req, { params });
+    expect(mockDelete).toHaveBeenCalledWith({ where: { id: 'a1', bookId: 'book-1' } });
+  });
 });

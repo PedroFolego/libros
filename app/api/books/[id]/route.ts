@@ -12,7 +12,16 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const updates = await request.json();
+  let body: { status?: string; rating?: number };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+  const { status, rating } = body;
+  const safeUpdates: { status?: string; rating?: number } = {};
+  if (status !== undefined) safeUpdates.status = status;
+  if (rating !== undefined) safeUpdates.rating = rating;
 
   const book = await prisma.book.findUnique({ where: { id } });
   if (!book) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -22,7 +31,7 @@ export async function PUT(
 
   const updated = await prisma.book.update({
     where: { id },
-    data: updates,
+    data: safeUpdates,
     include: { annotations: { orderBy: { createdAt: 'desc' } } },
   });
 

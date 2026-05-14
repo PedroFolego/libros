@@ -12,7 +12,13 @@ export async function POST(
   }
 
   const { id: bookId } = await params;
-  const { content } = await request.json();
+  let body: { content?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+  const { content } = body;
   if (!content?.trim()) {
     return NextResponse.json({ error: 'Content required' }, { status: 400 });
   }
@@ -52,6 +58,6 @@ export async function DELETE(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  await prisma.annotation.delete({ where: { id: annotationId } });
+  await prisma.annotation.delete({ where: { id: annotationId, bookId } });
   return new NextResponse(null, { status: 204 });
 }

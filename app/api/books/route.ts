@@ -23,7 +23,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { title, author, status } = await request.json();
+  let body: { title?: string; author?: string; status?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+  const { title, author, status } = body;
   if (!title || !author || !status) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
