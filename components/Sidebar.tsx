@@ -16,6 +16,7 @@ export default function Sidebar({ books, activeFilter, selectedBookId, onFilterC
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
+  const wasOpenedRef = useRef<boolean>(false);
 
   const filters = [
     { id: 'all' as BookStatus, icon: BookOpen, label: 'Todos', count: books.length },
@@ -47,9 +48,12 @@ export default function Sidebar({ books, activeFilter, selectedBookId, onFilterC
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isSummaryOpen]);
 
-  // Return focus to trigger button when modal closes
+  // Return focus to trigger button when modal closes.
+  // wasOpenedRef guards against the initial render where isSummaryOpen is false
+  // but the modal has never been opened — without this guard, .focus() would
+  // fire on mount and steal focus from whatever element the user was on.
   useEffect(() => {
-    if (!isSummaryOpen && triggerButtonRef.current) {
+    if (wasOpenedRef.current && !isSummaryOpen && triggerButtonRef.current) {
       triggerButtonRef.current.focus();
     }
   }, [isSummaryOpen]);
@@ -92,7 +96,7 @@ export default function Sidebar({ books, activeFilter, selectedBookId, onFilterC
           <button
             ref={triggerButtonRef}
             type="button"
-            onClick={() => setIsSummaryOpen(true)}
+            onClick={() => { wasOpenedRef.current = true; setIsSummaryOpen(true); }}
             className="w-full flex items-center gap-3 p-3 text-sm text-brand-muted hover:text-brand-text hover:bg-brand-bg/50 rounded-xl transition-all cursor-pointer"
           >
             <Sparkles className="w-4 h-4" />
