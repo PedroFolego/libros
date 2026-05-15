@@ -25,7 +25,12 @@ export async function PUT(
   }
   const safeUpdates: { status?: string; rating?: number } = {};
   if (status !== undefined) safeUpdates.status = status;
-  if (rating !== undefined) safeUpdates.rating = rating;
+  if (rating !== undefined) {
+    if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 0 || rating > 5) {
+      return NextResponse.json({ error: 'Rating must be an integer between 0 and 5' }, { status: 400 });
+    }
+    safeUpdates.rating = rating;
+  }
   if (Object.keys(safeUpdates).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
   }

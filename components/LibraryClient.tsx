@@ -127,7 +127,7 @@ export default function LibraryClient({ initialBooks, userAvatar }: LibraryClien
           </div>
           <button
             onClick={() => setIsAdding(true)}
-            className="bg-brand-primary text-white p-2 sm:px-4 sm:py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
+            className="bg-brand-primary text-white p-2 sm:px-4 sm:py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Adicionar</span>
