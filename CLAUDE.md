@@ -47,3 +47,43 @@ To add a test for a new API route, follow the pattern in `__tests__/api/books.te
 Requires `.env` (for Prisma CLI) and `.env.local` (for Next.js) with the same `DATABASE_URL`. Both are gitignored. See `.env.example` for the required keys: `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`.
 
 Local DB: `docker compose up -d` starts PostgreSQL on port 5432 (`libros/libros@localhost/libros`).
+
+## Multi-Agent Orchestration
+
+### Role of this (orchestrator) instance
+
+The orchestrator **never writes code directly**. Its only job is to delegate work via the Task tool to the sub-agents below and coordinate their outputs.
+
+### Standard flow
+
+```
+planner → coder → [tester + reviewer in parallel] → loop until clean → PR
+```
+
+1. **planner** — reads codebase, writes `PLAN.md`.
+2. **coder** — reads `PLAN.md`, opens `feature/*` branch, implements, commits, opens PR.
+3. **tester + reviewer** — run in parallel after each coder push.
+4. If `REVIEW.md` has Critical or Warning items → coder addresses them → back to step 3.
+5. When both `TEST_REPORT.md` and `REVIEW.md` are clean → PR is ready for human merge.
+
+### Inviolable rules
+
+| Agent | Can | Cannot |
+|---|---|---|
+| planner | Read, explore, write PLAN.md | Write code |
+| coder | Write code, commit, open PR | Merge, force-push, edit REVIEW.md |
+| reviewer | Read, run `git diff`, write REVIEW.md | Edit any source file |
+| tester | Run tests, write TEST_REPORT.md | Edit any source file |
+
+- One feature = one `feature/*` branch = one PR.
+- All commits must follow **Conventional Commits** (`feat:`, `fix:`, `test:`, `chore:`, etc.).
+- PRs are merged by a human only, never by an agent.
+
+### Commands used by agents
+
+```bash
+npm test          # vitest run — full test suite
+npm run lint      # next lint — ESLint
+```
+
+Default branch: **main**

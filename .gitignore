@@ -33,3 +33,9 @@ Thumbs.db
 *.swp
 *.swo
 .claude/settings.local.json
+
+# Multi-agent artifacts (ephemeral, not for version control)
+PLAN.md
+REVIEW.md
+TEST_REPORT.md
+.claude/agent-memory/
