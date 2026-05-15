@@ -33,6 +33,10 @@ export async function POST(request: Request) {
   if (!title || !author || !status) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
+  const VALID_STATUSES = ['reading', 'want-to-read', 'finished'];
+  if (!VALID_STATUSES.includes(status)) {
+    return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+  }
 
   const book = await prisma.book.create({
     data: { title, author, status, userId: session.user.id },

@@ -19,9 +19,16 @@ export async function PUT(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
   const { status, rating } = body;
+  const VALID_STATUSES = ['reading', 'want-to-read', 'finished'];
+  if (status !== undefined && !VALID_STATUSES.includes(status)) {
+    return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+  }
   const safeUpdates: { status?: string; rating?: number } = {};
   if (status !== undefined) safeUpdates.status = status;
   if (rating !== undefined) safeUpdates.rating = rating;
+  if (Object.keys(safeUpdates).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+  }
 
   const book = await prisma.book.findUnique({ where: { id } });
   if (!book) return NextResponse.json({ error: 'Not found' }, { status: 404 });
