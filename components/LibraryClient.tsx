@@ -12,11 +12,10 @@ import AddBookModal from './AddBookModal';
 
 interface LibraryClientProps {
   initialBooks: Book[];
-  userInitials: string;
-  userImage?: string | null;
+  userAvatar: string;
 }
 
-export default function LibraryClient({ initialBooks, userInitials, userImage }: LibraryClientProps) {
+export default function LibraryClient({ initialBooks, userAvatar }: LibraryClientProps) {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<BookStatus>('all');
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
@@ -133,11 +132,9 @@ export default function LibraryClient({ initialBooks, userInitials, userImage }:
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Adicionar</span>
           </button>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-border border-2 border-white shadow-sm overflow-hidden flex items-center justify-center text-brand-muted text-xs font-bold">
-            {userImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={userImage} alt="avatar" className="w-full h-full object-cover" />
-            ) : userInitials}
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white shadow-sm overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={userAvatar} alt="avatar" className="w-full h-full object-cover" />
           </div>
         </div>
       </nav>

@@ -29,19 +29,13 @@ export default async function HomePage() {
   }));
 
   const name = session.user.name ?? '';
-  const userInitials = name
-    .split(' ')
-    .filter((n) => n.length > 0)
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase() || 'U';
+  const avatarUrl = session.user.image ??
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=4A3E3F&color=fff&size=80&bold=true`;
 
   return (
     <LibraryClient
       initialBooks={books}
-      userInitials={userInitials}
-      userImage={session.user.image}
+      userAvatar={avatarUrl}
     />
   );
 }
