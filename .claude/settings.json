@@ -7,6 +7,7 @@
           {
             "type": "command",
             "command": "f=$(jq -r '.tool_input.file_path // \"\"'); if [[ \"$f\" =~ (^|/)\\.(env)([^/]*)?$ ]] && [[ ! \"$f\" =~ \\.env\\.example$ ]]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Acesso bloqueado: arquivos .env contem credenciais sensiveis\"}}'; fi",
+            "shell": "bash",
             "statusMessage": "Verificando acesso ao arquivo..."
           }
         ]
