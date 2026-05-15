@@ -1,7 +1,33 @@
-node_modules
-# Keep environment variables out of version control
-.env
-.env.local
-.env*.local
+# Dependencies
+node_modules/
 
+# Next.js
+.next/
+out/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Prisma
 /generated/prisma
+prisma/migrations/dev.db
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
