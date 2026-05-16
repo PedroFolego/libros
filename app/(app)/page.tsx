@@ -36,6 +36,7 @@ export default async function HomePage() {
     <LibraryClient
       initialBooks={books}
       userAvatar={avatarUrl}
+      isPremium={session.user.isPremium ?? false}
     />
   );
 }

@@ -13,9 +13,10 @@ import AddBookModal from './AddBookModal';
 interface LibraryClientProps {
   initialBooks: Book[];
   userAvatar: string;
+  isPremium: boolean;
 }
 
-export default function LibraryClient({ initialBooks, userAvatar }: LibraryClientProps) {
+export default function LibraryClient({ initialBooks, userAvatar, isPremium }: LibraryClientProps) {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<BookStatus>('all');
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
@@ -147,6 +148,7 @@ export default function LibraryClient({ initialBooks, userAvatar }: LibraryClien
             activeFilter={activeFilter}
             selectedBookId={selectedBookId}
             onFilterChange={(f) => { setActiveFilter(f); setSelectedBookId(null); }}
+            isPremium={isPremium}
           />
         </aside>
 
