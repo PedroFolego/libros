@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bookmark, BookOpen, CheckCircle2 } from 'lucide-react';
+import { Bookmark, BookOpen, CheckCircle2, Loader2 } from 'lucide-react';
 import type { BookStatus } from '@/types';
 
 interface AddBookModalProps {
-  onAdd: (data: { title: string; author: string; status: Exclude<BookStatus, 'all'> }) => void;
+  onAdd: (data: { title: string; author: string; status: Exclude<BookStatus, 'all'> }) => Promise<void>;
   onClose: () => void;
 }
 
@@ -16,11 +16,17 @@ export default function AddBookModal({ onAdd, onClose }: AddBookModalProps) {
     author: '',
     status: 'want-to-read' as Exclude<BookStatus, 'all'>,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title || !form.author) return;
-    onAdd(form);
+    setIsLoading(true);
+    try {
+      await onAdd(form);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -29,7 +35,7 @@ export default function AddBookModal({ onAdd, onClose }: AddBookModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={isLoading ? undefined : onClose}
         className="absolute inset-0 bg-brand-primary/20 backdrop-blur-md"
       />
       <motion.div
@@ -50,6 +56,7 @@ export default function AddBookModal({ onAdd, onClose }: AddBookModalProps) {
               className="w-full px-5 py-4 bg-brand-bg border border-brand-border rounded-xl text-brand-text focus:ring-1 focus:ring-brand-primary outline-none transition-all"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-1.5">
@@ -61,6 +68,7 @@ export default function AddBookModal({ onAdd, onClose }: AddBookModalProps) {
               className="w-full px-5 py-4 bg-brand-bg border border-brand-border rounded-xl text-brand-text focus:ring-1 focus:ring-brand-primary outline-none transition-all"
               value={form.author}
               onChange={(e) => setForm({ ...form, author: e.target.value })}
+              disabled={isLoading}
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -73,7 +81,8 @@ export default function AddBookModal({ onAdd, onClose }: AddBookModalProps) {
                 key={s.id}
                 type="button"
                 onClick={() => setForm({ ...form, status: s.id as Exclude<BookStatus, 'all'> })}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${form.status === s.id ? 'border-brand-primary bg-brand-primary text-white' : 'border-brand-bg bg-brand-bg text-brand-muted'}`}
+                disabled={isLoading}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${form.status === s.id ? 'border-brand-primary bg-brand-primary text-white' : 'border-brand-bg bg-brand-bg text-brand-muted'} disabled:opacity-60`}
               >
                 <s.icon className="w-5 h-5" />
                 <span className="text-[8px] font-bold uppercase">{s.label}</span>
@@ -82,14 +91,23 @@ export default function AddBookModal({ onAdd, onClose }: AddBookModalProps) {
           </div>
           <button
             type="submit"
-            className="w-full py-4 bg-brand-primary text-white rounded-xl font-bold uppercase text-sm tracking-widest shadow-lg shadow-brand-primary/20 hover:opacity-90 transition-opacity mt-4"
+            disabled={isLoading}
+            className="w-full py-4 bg-brand-primary text-white rounded-xl font-bold uppercase text-sm tracking-widest shadow-lg shadow-brand-primary/20 hover:opacity-90 transition-opacity mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Adicionar à Estante
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Adicionando...
+              </>
+            ) : (
+              'Adicionar à Estante'
+            )}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-3 text-brand-muted font-semibold text-xs hover:text-brand-text transition-colors"
+            disabled={isLoading}
+            className="w-full py-3 text-brand-muted font-semibold text-xs hover:text-brand-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
           </button>

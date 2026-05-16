@@ -17,3 +17,8 @@ body {
   background-color: var(--color-brand-bg);
   color: var(--color-brand-text);
 }
+
+button,
+[role="button"] {
+  cursor: pointer;
+}

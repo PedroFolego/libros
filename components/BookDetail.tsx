@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, MessageSquare, BookOpen, CheckCircle2, Bookmark, ArrowLeft } from 'lucide-react';
+import { Trash2, MessageSquare, BookOpen, CheckCircle2, Bookmark, ArrowLeft, Loader2 } from 'lucide-react';
 import type { Book, BookStatus } from '@/types';
 import Rating from './Rating';
 
 interface BookDetailProps {
   book: Book;
   onBack: () => void;
-  onUpdateBook: (id: string, updates: Partial<Pick<Book, 'status' | 'rating'>>) => void;
-  onDeleteBook: (id: string) => void;
-  onAddAnnotation: (bookId: string, content: string) => void;
-  onDeleteAnnotation: (bookId: string, annotationId: string) => void;
+  onUpdateBook: (id: string, updates: Partial<Pick<Book, 'status' | 'rating'>>) => Promise<void>;
+  onDeleteBook: (id: string) => Promise<void>;
+  onAddAnnotation: (bookId: string, content: string) => Promise<void>;
+  onDeleteAnnotation: (bookId: string, annotationId: string) => Promise<void>;
 }
 
 export default function BookDetail({
@@ -24,6 +24,51 @@ export default function BookDetail({
   onDeleteAnnotation,
 }: BookDetailProps) {
   const [newAnnotation, setNewAnnotation] = useState('');
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState<string | null>(null);
+  const [isDeletingBook, setIsDeletingBook] = useState(false);
+  const [isSavingAnnotation, setIsSavingAnnotation] = useState(false);
+  const [deletingAnnotationId, setDeletingAnnotationId] = useState<string | null>(null);
+
+  const handleStatusUpdate = async (statusId: Exclude<BookStatus, 'all'>) => {
+    if (isUpdatingStatus) return;
+    setIsUpdatingStatus(statusId);
+    try {
+      await onUpdateBook(book.id, { status: statusId });
+    } finally {
+      setIsUpdatingStatus(null);
+    }
+  };
+
+  const handleDeleteBook = async () => {
+    if (!confirm('Tem certeza que deseja remover este livro?')) return;
+    setIsDeletingBook(true);
+    try {
+      await onDeleteBook(book.id);
+    } finally {
+      setIsDeletingBook(false);
+    }
+  };
+
+  const handleSaveAnnotation = async () => {
+    if (!newAnnotation.trim() || isSavingAnnotation) return;
+    setIsSavingAnnotation(true);
+    try {
+      await onAddAnnotation(book.id, newAnnotation);
+      setNewAnnotation('');
+    } finally {
+      setIsSavingAnnotation(false);
+    }
+  };
+
+  const handleDeleteAnnotation = async (annotationId: string) => {
+    if (deletingAnnotationId) return;
+    setDeletingAnnotationId(annotationId);
+    try {
+      await onDeleteAnnotation(book.id, annotationId);
+    } finally {
+      setDeletingAnnotationId(null);
+    }
+  };
 
   return (
     <motion.div
@@ -65,22 +110,28 @@ export default function BookDetail({
             ] as const).map((s) => (
               <button
                 key={s.id}
-                onClick={() => onUpdateBook(book.id, { status: s.id })}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all text-xs font-bold uppercase tracking-widest ${book.status === s.id ? 'bg-brand-primary border-brand-primary text-white shadow-md' : 'bg-white border-brand-border text-brand-muted hover:border-brand-primary hover:text-brand-primary'}`}
+                onClick={() => handleStatusUpdate(s.id)}
+                disabled={isUpdatingStatus !== null}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all text-xs font-bold uppercase tracking-widest disabled:cursor-not-allowed ${book.status === s.id ? 'bg-brand-primary border-brand-primary text-white shadow-md' : 'bg-white border-brand-border text-brand-muted hover:border-brand-primary hover:text-brand-primary'} ${isUpdatingStatus === s.id ? 'opacity-70' : ''}`}
               >
-                <s.Icon className="w-3.5 h-3.5" />
+                {isUpdatingStatus === s.id ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <s.Icon className="w-3.5 h-3.5" />
+                )}
                 {s.label}
               </button>
             ))}
             <button
-              onClick={() => {
-                if (confirm('Tem certeza que deseja remover este livro?')) {
-                  onDeleteBook(book.id);
-                }
-              }}
-              className="ml-auto p-2 text-brand-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              onClick={handleDeleteBook}
+              disabled={isDeletingBook}
+              className="ml-auto p-2 text-brand-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Trash2 className="w-5 h-5" />
+              {isDeletingBook ? (
+                <Loader2 className="w-5 h-5 animate-spin text-red-400" />
+              ) : (
+                <Trash2 className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
@@ -94,18 +145,22 @@ export default function BookDetail({
             value={newAnnotation}
             onChange={(e) => setNewAnnotation(e.target.value)}
             placeholder="O que esta obra te faz pensar agora?"
-            className="flex-grow w-full bg-brand-bg rounded-xl p-4 text-sm font-medium border-none focus:ring-1 focus:ring-brand-primary outline-none transition-all resize-none min-h-[150px]"
+            disabled={isSavingAnnotation}
+            className="flex-grow w-full bg-brand-bg rounded-xl p-4 text-sm font-medium border-none focus:ring-1 focus:ring-brand-primary outline-none transition-all resize-none min-h-[150px] disabled:opacity-60"
           />
           <button
-            onClick={() => {
-              if (newAnnotation.trim()) {
-                onAddAnnotation(book.id, newAnnotation);
-                setNewAnnotation('');
-              }
-            }}
-            className="mt-4 w-full py-3 bg-brand-primary text-white rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-md hover:opacity-90 transition-opacity"
+            onClick={handleSaveAnnotation}
+            disabled={isSavingAnnotation || !newAnnotation.trim()}
+            className="mt-4 w-full py-3 bg-brand-primary text-white rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-md hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Salvar Pensamento
+            {isSavingAnnotation ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              'Salvar Pensamento'
+            )}
           </button>
         </div>
         <div className="lg:col-span-2 bg-white rounded-2xl border border-brand-border p-6 shadow-sm min-h-[400px]">
@@ -135,10 +190,15 @@ export default function BookDetail({
                         {new Date(ann.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       <button
-                        onClick={() => onDeleteAnnotation(book.id, ann.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-brand-muted hover:text-red-500 transition-all"
+                        onClick={() => handleDeleteAnnotation(ann.id)}
+                        disabled={deletingAnnotationId === ann.id}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-brand-muted hover:text-red-500 transition-all disabled:opacity-100 disabled:cursor-not-allowed"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        {deletingAnnotationId === ann.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin text-red-400" />
+                        ) : (
+                          <Trash2 className="w-3 h-3" />
+                        )}
                       </button>
                     </div>
                     <p className="text-sm font-medium text-brand-text leading-relaxed whitespace-pre-wrap">

@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -17,11 +19,11 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' https://ui-avatars.com data:",
               "font-src 'self'",
-              "connect-src 'self'",
+              `connect-src 'self'${isDev ? ' ws://localhost:3000' : ''}`,
               "frame-ancestors 'none'",
             ].join('; '),
           },

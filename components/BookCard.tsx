@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { MessageSquare, Bookmark, BookOpen, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, Bookmark, BookOpen, CheckCircle2, Loader2 } from 'lucide-react';
 import type { Book, BookStatus } from '@/types';
 import Rating from './Rating';
 
@@ -10,11 +11,22 @@ interface BookCardProps {
   index: number;
   searchTerm: string;
   onSelect: (id: string) => void;
-  onUpdateStatus: (id: string, status: Exclude<BookStatus, 'all'>) => void;
+  onUpdateStatus: (id: string, status: Exclude<BookStatus, 'all'>) => Promise<void>;
 }
 
 export default function BookCard({ book, index, searchTerm, onSelect, onUpdateStatus }: BookCardProps) {
   const isFeatured = index === 0 && !searchTerm;
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  const handleStatusUpdate = async (status: Exclude<BookStatus, 'all'>) => {
+    if (updatingStatus) return;
+    setUpdatingStatus(status);
+    try {
+      await onUpdateStatus(book.id, status);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
 
   return (
     <motion.div
@@ -84,10 +96,15 @@ export default function BookCard({ book, index, searchTerm, onSelect, onUpdateSt
               ] as const).map(({ s, Icon }) => (
                 <button
                   key={s}
-                  onClick={() => onUpdateStatus(book.id, s)}
-                  className={`p-1 rounded-lg border transition-all ${book.status === s ? 'bg-brand-primary border-brand-primary text-white' : 'border-brand-border text-brand-muted'}`}
+                  onClick={() => handleStatusUpdate(s)}
+                  disabled={updatingStatus !== null}
+                  className={`p-1 rounded-lg border transition-all disabled:cursor-not-allowed ${book.status === s ? 'bg-brand-primary border-brand-primary text-white' : 'border-brand-border text-brand-muted'} ${updatingStatus === s ? 'opacity-70' : ''}`}
                 >
-                  <Icon className="w-3 h-3" />
+                  {updatingStatus === s ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Icon className="w-3 h-3" />
+                  )}
                 </button>
               ))}
             </div>
