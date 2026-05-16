@@ -4,16 +4,19 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Bookmark, CheckCircle2, Sparkles, Copy, Check, X } from 'lucide-react';
 import type { Book, BookStatus } from '@/types';
+import UpgradeModal from './UpgradeModal';
 
 interface SidebarProps {
   books: Book[];
   activeFilter: BookStatus;
   selectedBookId: string | null;
   onFilterChange: (filter: BookStatus) => void;
+  isPremium: boolean;
 }
 
-export default function Sidebar({ books, activeFilter, selectedBookId, onFilterChange }: SidebarProps) {
+export default function Sidebar({ books, activeFilter, selectedBookId, onFilterChange, isPremium }: SidebarProps) {
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
   const wasOpenedRef = useRef<boolean>(false);
@@ -96,11 +99,23 @@ export default function Sidebar({ books, activeFilter, selectedBookId, onFilterC
           <button
             ref={triggerButtonRef}
             type="button"
-            onClick={() => { wasOpenedRef.current = true; setIsSummaryOpen(true); }}
+            onClick={() => {
+              if (isPremium) {
+                wasOpenedRef.current = true;
+                setIsSummaryOpen(true);
+              } else {
+                setIsUpgradeOpen(true);
+              }
+            }}
             className="w-full flex items-center gap-3 p-3 text-sm text-brand-muted hover:text-brand-text hover:bg-brand-bg/50 rounded-xl transition-all cursor-pointer"
           >
             <Sparkles className="w-4 h-4" />
             <span>Recomendar com IA</span>
+            {!isPremium && (
+              <span className="text-[9px] font-bold uppercase tracking-widest bg-brand-primary text-white px-1.5 py-0.5 rounded-full ml-auto">
+                Premium
+              </span>
+            )}
           </button>
         </div>
 
@@ -115,6 +130,8 @@ export default function Sidebar({ books, activeFilter, selectedBookId, onFilterC
           </div>
         </div>
       </div>
+
+      <UpgradeModal isOpen={isUpgradeOpen} onClose={() => setIsUpgradeOpen(false)} />
 
       {/* Summary Modal */}
       <AnimatePresence>
