@@ -35,7 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.name) session.user.name = token.name;
       if (token.email) session.user.email = token.email;
       if (token.picture) session.user.image = token.picture as string;
-      session.user.isPremium = token.isPremium as boolean ?? false;
+      session.user.isPremium = token.isPremium ?? false;
       return session;
     },
   },
