@@ -17,7 +17,7 @@ model User {
   books                  Book[]
   accounts               Account[]
   sessions               Session[]
-  stripeCustomerId       String?
+  stripeCustomerId       String?   @unique
   stripeSubscriptionId   String?
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
