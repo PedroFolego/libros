@@ -87,3 +87,30 @@ npm run lint      # next lint — ESLint
 ```
 
 Default branch: **main**
+
+## Premium / Stripe
+
+### Environment variables
+
+Add these to both `.env` and `.env.local` (see `.env.example` for a full list):
+
+- `STRIPE_SECRET_KEY` — Stripe secret key (sk_test_... / sk_live_...)
+- `STRIPE_WEBHOOK_SECRET` — from `stripe listen` or Stripe dashboard webhook settings
+- `STRIPE_PRICE_ID` — the recurring Price ID of the Premium plan (price_...)
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — publishable key (reserved for future Stripe.js use)
+
+### Local webhook development
+
+Install the Stripe CLI, then in a separate terminal run:
+```
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
+Copy the displayed webhook signing secret and set it as `STRIPE_WEBHOOK_SECRET` in `.env.local`.
+
+### Flipping a test user to Premium manually
+
+Run `npx prisma studio`, open the `User` table, and set `stripeCurrentPeriodEnd` to any future date. The next page navigation will re-evaluate the JWT and reflect `isPremium: true`.
+
+### Edge-safety constraint
+
+`lib/stripe.ts` uses Node.js built-ins and must never be imported from `lib/auth.config.ts` or `middleware.ts`. Stripe logic belongs exclusively in `lib/auth.ts`, `lib/stripe.ts`, and `app/api/stripe/*` routes.
