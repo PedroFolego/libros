@@ -3,7 +3,6 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     user: {
-      findFirst: vi.fn(),
       update: vi.fn(),
     },
   },
